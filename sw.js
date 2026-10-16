@@ -1,6 +1,6 @@
 /* 오답노트 서비스 워커 - 앱 셸을 캐시해 오프라인에서도 실행됩니다.
  * 파일을 수정해 배포할 때는 CACHE 버전 숫자를 올려 주세요. */
-const CACHE = 'odap-v2';
+const CACHE = 'odap-v3';
 const ASSETS = [
   './', './index.html', './style.css', './engine.js', './app.js', './manifest.webmanifest',
   './icons/icon-192.png', './icons/icon-512.png', './icons/maskable-512.png',

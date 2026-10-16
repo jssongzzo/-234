@@ -314,10 +314,9 @@
     if (comps.length < 3) return { label, comps, regions: [], compRegion: new Int32Array(nid + 1).fill(-1), medH: 0, tref: 0 };
 
     // --- 3) 기준값: 인쇄 농도, 글자 높이
-    const byTone = comps.slice().sort((a, b) => a.tone - b.tone);
-    let totalArea = 0; for (const c of comps) totalArea += c.area;
-    let acc = 0, tref = byTone[0].tone;
-    for (const c of byTone) { acc += c.area; if (acc >= totalArea * 0.2) { tref = c.tone; break; } }
+    // 인쇄 농도 기준: 진한 펜 글씨가 많아도 흔들리지 않도록 "개수 기준" 하위 35% 지점을 사용
+    const toneSorted = comps.filter((c) => !c.big).map((c) => c.tone).sort((a, b) => a - b);
+    const tref = toneSorted.length ? toneSorted[Math.floor(toneSorted.length * 0.35)] : comps[0].tone;
     const charLike = comps.filter((c) => !c.big && c.h >= 4);
     const medH = Math.max(6, median(charLike.map((c) => c.h)));
 
@@ -346,14 +345,10 @@
       if (baseDev > baseT || hcv > hcvT) {
         // 줄 전체가 아니라, 같은 줄의 "다수(인쇄)" 기준선·크기에서 벗어난 글자만 표시한다.
         const mhh = median(hs);
-        const tol = Math.max(baseT, 0.12) * (o.tolMul || 1);
-        if (baseDev > 0.5 * baseT) {
-          // 줄 전체가 흔들리는 경우(순수 손글씨 줄): 전부 표시
-          if (baseDev > baseT * (o.fullMul || 2.2) || hcv > hcvT * (o.fullMul ? o.fullMul * 0.75 : 1.6)) { for (const c of mem) c.hw = true; continue; }
-        }
+        const tol = Math.max(baseT, 0.12) * (o.tolMul || (3.4 - sens * 0.024));   // 민감도 50 → 2.2배
         for (const c of mem) {
           const res = Math.abs(c.y1 - slope * ((c.x0 + c.x1) / 2) - b0) / medH;
-          const hr = c.h / mhh;
+          const hr = c.h / medH;   // 줄 중앙값이 아니라 페이지 기준(한글은 줄 안에서도 높이가 제각각)
           if (res > tol || hr > (o.hrHi || 1.5) || hr < (o.hrLo || 0.55)) c.hw = true;
         }
       }
@@ -388,8 +383,55 @@
       if (frac < 0.5) for (const c of r.mem) if (!c.byTone) { c.hw = false; changed = true; }
     }
     if (changed) built = buildRegions();
-    const compRegion = built.compRegion, regions = built.regions.map((r) => ({ x0: r.x0, y0: r.y0, x1: r.x1, y1: r.y1, n: r.n }));
+    const compRegion = built.compRegion, regions = built.regions.map((r) => ({ x0: r.x0, y0: r.y0, x1: r.x1, y1: r.y1, n: r.n, tf: r.mem.filter((c) => c.byTone).length / r.n }));
     return { label, comps, regions, compRegion, medH, tref };
+  };
+
+
+  /**
+   * "문제만 남기기": 인쇄된 문제 본문으로 보이는 영역(사각형 목록)을 제안한다.
+   * 본문 밖(여백·빈 공간)의 잉크는 모두 풀이/낙서로 보고 지우는 데 쓴다.
+   * det: detectHandwriting 결과 (손글씨로 판정된 성분은 본문 후보에서 제외)
+   */
+  Engine.proposeKeep = function (det, W, H) {
+    const medH = det.medH || 20;
+    const P = det.comps.filter((c) => !c.hw);
+    if (!P.length) return [{ x0: 0, y0: 0, x1: W - 1, y1: H - 1 }];
+    const gmap = groupComps(P, Math.round(medH * 2.5), Math.round(medH * 1.5));
+    const blocks = new Map();
+    for (const c of P) {
+      const g = gmap.get(c.id);
+      let b = blocks.get(g);
+      if (!b) { b = { x0: c.x0, y0: c.y0, x1: c.x1, y1: c.y1, n: 0, big: false, hs: [] }; blocks.set(g, b); }
+      b.x0 = Math.min(b.x0, c.x0); b.y0 = Math.min(b.y0, c.y0); b.x1 = Math.max(b.x1, c.x1); b.y1 = Math.max(b.y1, c.y1);
+      if (c.big) b.big = true;
+      else if (c.h >= medH * 0.45) { b.n++; b.hs.push(c.h); }
+    }
+    const list = Array.from(blocks.values());
+    for (const b of list) b.mh = median(b.hs) || medH;
+    list.sort((a, b) => b.n - a.n);
+    const main = list[0];
+    const kept = [main];
+    const near = (a, b, d) => !(a.x0 > b.x1 + d || a.x1 < b.x0 - d || a.y0 > b.y1 + d || a.y1 < b.y0 - d);
+    // 1) 같은 크기의 글자로 된 충분히 긴 본문 블록
+    for (const b of list.slice(1)) {
+      if (b.n >= 12 && Math.abs(b.mh / main.mh - 1) < 0.25) kept.push(b);
+    }
+    // 2) 도형·표(큰 성분)와 그 곁의 짧은 라벨: 이미 남기기로 한 블록 가까이에 있으면 함께 남김
+    let grew = true;
+    while (grew) {
+      grew = false;
+      for (const b of list) {
+        if (kept.includes(b)) continue;
+        const close = kept.some((k) => near(b, k, medH * (b.big ? 8 : 3)));
+        if (close && (b.big || b.n < 12)) { kept.push(b); grew = true; }
+      }
+    }
+    const pad = Math.round(medH * 1.2);
+    return kept.map((b) => ({
+      x0: Math.max(0, b.x0 - pad), y0: Math.max(0, b.y0 - pad),
+      x1: Math.min(W - 1, b.x1 + pad), y1: Math.min(H - 1, b.y1 + pad),
+    }));
   };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = Engine;

@@ -199,3 +199,6 @@ dialog::backdrop { background: rgba(16,36,59,.55); }
 .auto-row2 { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .auto-row2 .btn.small { min-height: 40px; padding: 0 12px; font-size: 14px; border-width: 1.5px; }
 .auto-row2 .slider-row.compact { flex: 1; min-width: 130px; width: auto; }
+.keep-switch { min-height: 40px; }
+.keep-switch .lbl { font-size: 14px; }
+.btn.small[aria-pressed="true"] { background: var(--ink); color: #fff; }

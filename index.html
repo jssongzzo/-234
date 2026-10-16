@@ -136,6 +136,15 @@
         </div>
         <div class="opts" id="opt-auto" hidden>
           <p class="tip" id="autoTip">연필·검정 펜 풀이를 자동으로 찾아요. 노란 칸이 지워진 부분이에요. 지우면 안 되는 칸은 탭해서 빼 주세요.</p>
+          <label class="switch keep-switch">
+            <input type="checkbox" id="optKeep">
+            <span class="track" aria-hidden="true"></span>
+            <span class="lbl">문제만 남기기 (여백 풀이 모두 지우기)</span>
+          </label>
+          <div class="auto-row2" id="keepRow" hidden>
+            <button type="button" class="btn small ghost" id="btnKeepDraw" aria-pressed="false">문제 영역 직접 그리기</button>
+            <button type="button" class="btn small ghost" id="btnKeepReset">자동으로 다시</button>
+          </div>
           <div class="auto-row2">
             <button type="button" class="btn small ghost" id="btnDetect">다시 찾기</button>
             <button type="button" class="btn small ghost" id="btnDetectClear">감지 취소</button>

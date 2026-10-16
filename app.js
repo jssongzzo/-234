@@ -241,7 +241,8 @@
   let showOrig = false;
 
   const opt = { red: true, sens: 55, tool: 'brush', brush: 10, inkAngle: 22, hwSens: 50 };
-  let det = null, regionSel = [], detTried = false;   // 손글씨 자동 감지 결과
+  let det = null, regionSel = [], detTried = false;
+  let keepOn = false, keep = [], keepUser = false, keepDraw = false;   // 문제만 남기기   // 손글씨 자동 감지 결과
   const redT = () => Math.round(100 - opt.sens * 0.8);
   const dilR = () => Math.max(2, Math.round(Math.max(W, H) / 450));
 
@@ -270,7 +271,8 @@
 
       A = Engine.analyze(baseData.data, W, H);
       manual = new Uint8Array(W * H);
-      ops = []; inks = []; zoom = 1; showOrig = false; det = null; regionSel = []; detTried = false;
+      ops = []; inks = []; zoom = 1; showOrig = false; det = null; regionSel = []; detTried = false; keepOn = false; keep = []; keepUser = false; keepDraw = false;
+      $('#optKeep').checked = false; $('#keepRow').hidden = true; setKeepDraw(false);
       renderChips(); updateUndo(); updateZoomLabel();
 
       go('edit');
@@ -296,6 +298,17 @@
     for (const ink of inks) { Engine.inkMask(auto, baseData.data, A, W, H, ink, opt.inkAngle); any = true; }
     const hole = any ? Engine.dilate(auto, W, H, dilR()) : auto;
     if (skipDetect) return hole;
+    if (keepOn && det && keep.length) {
+      const outside = new Uint8Array(det.comps.reduce((m, c) => Math.max(m, c.id), 0) + 1);
+      for (const c of det.comps) {
+        const cx = (c.x0 + c.x1) / 2, cy = (c.y0 + c.y1) / 2;
+        if (!keep.some((r) => cx >= r.x0 && cx <= r.x1 && cy >= r.y0 && cy <= r.y1)) outside[c.id] = 1;
+      }
+      const out = new Uint8Array(N), lab = det.label;
+      for (let i = 0; i < N; i++) { const l = lab[i]; if (l && outside[l]) out[i] = 1; }
+      const outd = Engine.dilate(out, W, H, dilR() + 1);
+      for (let i = 0; i < N; i++) if (outd[i]) hole[i] = 1;
+    }
     if (det && regionSel.some(Boolean)) {
       const hw = new Uint8Array(N), lab = det.label, cr = det.compRegion;
       for (let i = 0; i < N; i++) { const l = lab[i]; if (l && cr[l] >= 0 && regionSel[cr[l]]) hw[i] = 1; }
@@ -351,6 +364,7 @@
     wrap.dataset.tool = t;
     $$('.seg button').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.tool === t)));
     for (const k of ['brush', 'rect', 'ink', 'auto', 'pan']) $('#opt-' + k).hidden = k !== t;
+    if (t !== 'auto' && keepDraw) setKeepDraw(false);
     drawRegions();
     if (t === 'auto' && W && !detTried) runDetect();
   }
@@ -373,9 +387,12 @@
     try {
       const exclude = buildHole(true);           // 이미 지운 채점·글씨색은 종이로 취급
       det = Engine.detectHandwriting(baseData.data, W, H, A, exclude, { sens: opt.hwSens });
-      regionSel = det.regions.map(() => true);
+      // 연필(농도 근거)은 기본으로 지우고, 검정 펜으로 의심되는 칸은 꺼 둔 채 보여 준다
+      regionSel = det.regions.map((r) => r.tf >= 0.5);
+      if (!keepUser) keep = Engine.proposeKeep(det, W, H);
+      const on = regionSel.filter(Boolean).length, off = regionSel.length - on;
       $('#autoTip').textContent = det.regions.length
-        ? `손글씨로 보이는 ${det.regions.length}곳을 지웠어요. 노란 칸이 지워진 부분이에요. 지우면 안 되는 칸은 탭해서 빼 주세요.`
+        ? `연필 풀이 ${on}곳을 지웠어요(노란 칸).` + (off ? ` 빨간 점선 ${off}곳은 검정 펜 글씨로 의심되는 곳이에요. 탭하면 지워요.` : '') + ' 잘못 지운 칸은 다시 탭하면 돌아와요.'
         : '손글씨를 찾지 못했어요. 민감도를 올리거나 브러시·영역으로 직접 지워 주세요.';
       doRender();
       drawRegions();
@@ -386,7 +403,7 @@
   function drawRegions() {
     ovlCtx.clearRect(0, 0, W || 1, H || 1);
     if (!det || opt.tool !== 'auto') return;
-    const pad = Math.max(4, Math.round(det.medH * 0.4)), lw = Math.max(2, W / 350);
+        const pad = Math.max(4, Math.round(det.medH * 0.4)), lw = Math.max(2, W / 350);
     det.regions.forEach((r, i) => {
       const x = r.x0 - pad, y = r.y0 - pad, w = r.x1 - r.x0 + 2 * pad, h = r.y1 - r.y0 + 2 * pad;
       ovlCtx.lineWidth = lw;
@@ -399,6 +416,13 @@
       ovlCtx.strokeRect(x, y, w, h);
     });
     ovlCtx.setLineDash([]);
+    drawKeep();
+  }
+  function drawKeep() {
+    if (!keepOn || opt.tool !== 'auto') return;
+    const lw = Math.max(3, W / 250);
+    ovlCtx.lineWidth = lw; ovlCtx.strokeStyle = '#0A7B67'; ovlCtx.setLineDash([]);
+    for (const r of keep) { ovlCtx.strokeRect(r.x0, r.y0, r.x1 - r.x0, r.y1 - r.y0); }
   }
   function toggleRegionAt(p) {
     if (!det) return;
@@ -414,6 +438,27 @@
     regionSel[best] = !regionSel[best];
     drawRegions(); scheduleRender(0);
   }
+  function setKeepDraw(on) {
+    keepDraw = on;
+    const b = $('#btnKeepDraw');
+    b.setAttribute('aria-pressed', String(on));
+    b.textContent = on ? '그리기 끝내기' : '문제 영역 직접 그리기';
+    if (on) $('#autoTip').textContent = '문제 글이 있는 부분을 사각형으로 끌어 주세요. 여러 개 그릴 수 있고, 초록 칸을 탭하면 지워져요. 칸 밖의 필기는 전부 지워져요.';
+  }
+  $('#optKeep').addEventListener('change', async (e) => {
+    keepOn = e.target.checked;
+    $('#keepRow').hidden = !keepOn;
+    if (keepOn && !det) await runDetect();
+    if (!keepOn) setKeepDraw(false);
+    drawRegions(); scheduleRender(0);
+    if (keepOn) toast('초록 칸 밖의 필기를 모두 지웠어요. 칸이 맞지 않으면 직접 그려 조정하세요.', 3600);
+  });
+  $('#btnKeepDraw').addEventListener('click', () => setKeepDraw(!keepDraw));
+  $('#btnKeepReset').addEventListener('click', () => {
+    keepUser = false; setKeepDraw(false);
+    if (det) keep = Engine.proposeKeep(det, W, H);
+    drawRegions(); scheduleRender(0);
+  });
   $('#btnDetect').addEventListener('click', runDetect);
   $('#btnDetectClear').addEventListener('click', () => { det = null; regionSel = []; detTried = true; drawRegions(); scheduleRender(0); $('#autoTip').textContent = '자동 감지를 취소했어요. "다시 찾기"로 다시 시도할 수 있어요.'; });
   $('#hwSens').addEventListener('input', (e) => { opt.hwSens = +e.target.value; });
@@ -461,9 +506,9 @@
     e.preventDefault();
     const p = imgPt(e);
     if (opt.tool === 'ink') { pickInk(p.x, p.y); return; }
-    if (opt.tool === 'auto') { toggleRegionAt(p); return; }
+    if (opt.tool === 'auto' && !keepDraw) { toggleRegionAt(p); return; }
     ovl.setPointerCapture(e.pointerId);
-    stroke = { tool: opt.tool, pts: [p], start: p, cur: p, r: brushR() };
+    stroke = { tool: opt.tool === 'auto' ? 'keep' : opt.tool, pts: [p], start: p, cur: p, r: brushR() };
     if (stroke.tool === 'brush') {
       ovlCtx.fillStyle = PREVIEW;
       ovlCtx.beginPath(); ovlCtx.arc(p.x, p.y, stroke.r, 0, Math.PI * 2); ovlCtx.fill();
@@ -494,6 +539,22 @@
     if (!stroke) return;
     const s = stroke; stroke = null;
     ovlCtx.clearRect(0, 0, W, H);
+    if (s.tool === 'keep') {
+      if (commit) {
+        const x0 = Math.min(s.start.x, s.cur.x), x1 = Math.max(s.start.x, s.cur.x);
+        const y0 = Math.min(s.start.y, s.cur.y), y1 = Math.max(s.start.y, s.cur.y);
+        if (x1 - x0 < 10 && y1 - y0 < 10) {                       // 탭: 해당 칸 삭제
+          keep = keep.filter((r) => !(s.start.x >= r.x0 && s.start.x <= r.x1 && s.start.y >= r.y0 && s.start.y <= r.y1));
+          keepUser = true;
+        } else if (x1 - x0 >= 20 && y1 - y0 >= 20) {
+          if (!keepUser) { keep = []; keepUser = true; }           // 처음 그리면 자동 제안을 대체
+          keep.push({ x0, y0, x1, y1 });
+        }
+        scheduleRender(0);
+      }
+      drawRegions();
+      return;
+    }
     if (!commit) return;
     let op = null;
     if (s.tool === 'brush') op = { t: 'b', r: s.r, pts: s.pts };
