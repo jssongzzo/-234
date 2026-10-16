@@ -2,127 +2,191 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#f5f7fb">
-<meta name="description" content="문제지 사진에서 오답 문제를 골라 오답노트 PDF로 출력하는 수학 오답노트">
-<link rel="manifest" href="manifest.json">
-<title>수학 오답노트</title>
-<style>
-:root{color-scheme:light;--bg:#f5f7fb;--panel:#fff;--ink:#172033;--muted:#667085;--line:#dfe5ef;--blue:#315efb;--blue2:#eaf0ff;--red:#b42318;--green:#067647;--shadow:0 8px 24px rgba(22,34,66,.07)}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;line-height:1.5}button,input{font:inherit}button{border:0;border-radius:12px;padding:11px 15px;background:var(--blue);color:white;font-weight:700;cursor:pointer}button.secondary{background:#eef1f7;color:#25304a}button.danger{background:#fff0ef;color:var(--red)}button:disabled{opacity:.45;cursor:not-allowed}.app{max-width:1100px;margin:auto;padding:20px 16px 48px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}.brand{display:flex;gap:12px;align-items:center}.logo{width:46px;height:46px;border-radius:14px;background:#e7edff;display:grid;place-items:center;font-size:24px}.brand h1{font-size:22px;line-height:1.2;margin:0}.brand p{margin:4px 0 0;color:var(--muted);font-size:13px}.pill{border-radius:999px;background:#e8f7ee;color:var(--green);padding:6px 10px;font-size:12px;font-weight:700;white-space:nowrap}.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:18px}.step{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:10px;text-align:center;color:var(--muted);font-size:13px}.step b{display:block;color:var(--ink);font-size:14px}.step.active{border-color:#9bb0ff;background:var(--blue2)}.layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,.85fr);gap:16px;align-items:start}.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:var(--shadow);min-width:0}.panel h2{font-size:17px;margin:0 0 6px}.sub{color:var(--muted);font-size:13px;margin:0 0 14px}.upload{border:1.5px dashed #aab8d2;background:#fafbff;border-radius:14px;padding:20px;text-align:center}.upload input{max-width:100%;margin:10px auto}.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.canvas-wrap{position:relative;width:100%;overflow:hidden;border:1px solid var(--line);border-radius:12px;background:#f1f3f7;touch-action:pan-y}.canvas-wrap canvas{display:block;width:100%;height:auto;touch-action:none;cursor:crosshair}.empty{padding:34px 12px;text-align:center;color:var(--muted);font-size:14px}.note{border-radius:12px;background:#fff8e7;border:1px solid #f5df9b;color:#765400;padding:11px 12px;font-size:12px;margin-top:12px}.hint{font-size:12px;color:var(--muted)}.problem-list{display:grid;gap:10px;margin-top:12px}.problem{border:1px solid var(--line);border-radius:13px;padding:10px;display:grid;grid-template-columns:92px minmax(0,1fr);gap:10px;align-items:center}.problem img{width:92px;max-height:110px;object-fit:contain;background:#f5f6f8;border-radius:8px}.problem strong{display:block;font-size:13px}.problem small{display:block;color:var(--muted);font-size:12px;margin:3px 0 8px}.problem .actions{display:flex;gap:6px;flex-wrap:wrap}.problem .actions button{font-size:12px;padding:7px 9px}.problem.wrong{border-color:#f0a8a2;background:#fffafa}.problem.correct{opacity:.7}.counts{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.count{padding:7px 10px;background:#f1f4fa;border-radius:10px;font-size:12px}.full{width:100%;margin-top:10px}.separator{height:1px;background:var(--line);margin:16px 0}.status{font-size:12px;color:var(--muted);margin-top:8px;min-height:18px}.hidden{display:none!important}.print-header{display:none}
-@media(max-width:760px){.layout{grid-template-columns:1fr}.steps{grid-template-columns:repeat(2,1fr)}.app{padding:14px 11px 32px}.panel{padding:14px}.top{align-items:flex-start}.pill{display:none}}
-@media print{@page{size:A4;margin:12mm}body{background:white}.app,.no-print{display:none!important}#printArea{display:block!important;color:#111}.print-header{display:block;margin-bottom:14px}.print-grid{display:grid;grid-template-columns:1fr 1fr;gap:8mm 6mm}.print-item{break-inside:avoid;border:1px solid #ddd;padding:4mm;min-height:50mm}.print-item img{width:100%;height:auto;max-height:100mm;object-fit:contain}.print-item .label{font-size:10pt;margin-bottom:2mm;color:#333}.print-item .blank{height:18mm;border-top:1px dashed #bbb;margin-top:4mm}}
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>오답노트 - 채점과 풀이를 지워 다시 풀기</title>
+<meta name="description" content="수학 문제를 사진으로 찍으면 채점 표시와 내가 쓴 풀이를 지워 줍니다.">
+<meta name="theme-color" content="#F3F7F5">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="오답노트">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="app">
-  <header class="top"><div class="brand"><div class="logo">✏️</div><div><h1>수학 오답노트</h1><p>사진에서 틀린 문제를 모아 다시 풀어보세요</p></div></div><span class="pill">휴대폰 · 태블릿 · PC</span></header>
-  <nav class="steps"><div class="step active"><b>1. 사진 등록</b>문제지 불러오기</div><div class="step"><b>2. 문제 영역 선택</b>문제별로 잘라내기</div><div class="step"><b>3. 오답 확인</b>틀린 문제 표시</div><div class="step"><b>4. PDF 출력</b>A4 인쇄</div></nav>
-  <div class="layout">
-    <section class="panel">
-      <h2>① 문제지 사진</h2><p class="sub">카메라로 찍거나 갤러리에서 사진을 선택하세요.</p>
-      <div class="upload" id="uploadBox"><div style="font-size:28px">📷</div><strong>문제지 사진 등록</strong><div class="hint">JPG · PNG · WEBP / 여러 장 선택 가능</div><input id="fileInput" type="file" accept="image/*" capture="environment" multiple></div>
-      <div id="editor" class="hidden">
-        <div class="toolbar"><button id="prevPage" class="secondary">← 이전</button><button id="nextPage" class="secondary">다음 →</button><button id="cropMode">문제 영역 선택</button><button id="eraseMode" class="secondary">수동 지우개</button><button id="autoCleanBtn">색상 채점 흔적 자동 제거</button><button id="pencilCleanBtn" class="secondary">회색 연필 필기 자동 보정</button><button id="undoBtn" class="secondary">되돌리기</button></div>
-        <div class="canvas-wrap"><canvas id="pageCanvas"></canvas></div>
-        <div class="status" id="pageStatus"></div>
-        <div class="note"><b>사진 보정 안내</b><br>문제 영역 선택: 문제 하나를 드래그하세요. 채점 흔적 자동 제거: 빨강·분홍·파랑 표시와 회색 연필로 추정되는 흔적을 각각 보정할 수 있습니다. 자동 처리 결과는 반드시 확인하세요. 인쇄된 회색 선이나 숫자도 필기로 오인될 수 있어, 원본 글자와 완벽히 구분되는 것은 아닙니다.</div>
-        <button id="addProblem" class="full">선택한 영역을 문제 목록에 추가</button>
+<div id="app">
+
+  <header class="topbar">
+    <button id="btnBack" class="icon-btn" hidden aria-label="이전 단계">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </button>
+    <div class="brand"><i aria-hidden="true"></i>오답노트</div>
+    <ol class="steps" id="steps" aria-label="진행 단계">
+      <li data-step="home" class="on">촬영</li>
+      <li data-step="crop">자르기</li>
+      <li data-step="edit">지우기</li>
+    </ol>
+  </header>
+
+  <main>
+    <!-- 1. 홈 -->
+    <section id="screen-home" class="screen home">
+      <div class="home-scroll">
+        <div class="demo">
+          <svg id="demoSvg" viewBox="0 0 320 178" role="img" aria-label="채점 표시와 손글씨 풀이가 있는 수학 문제 예시">
+            <rect x="0" y="0" width="320" height="178" rx="10" class="d-paper"/>
+            <g class="d-print">
+              <text x="18" y="34" class="d-qno">7.</text>
+              <text x="40" y="34" class="d-txt">다음 방정식의 해를 구하시오.</text>
+              <text x="40" y="76" class="d-math">2x + 3 = 11</text>
+              <text x="190" y="128" class="d-txt">답:</text>
+              <line x1="214" y1="130" x2="288" y2="130" class="d-line"/>
+            </g>
+            <g class="d-ink">
+              <text x="40" y="108" class="d-hand">2x = 8</text>
+              <text x="222" y="126" class="d-hand d-hand-big">x = 4</text>
+            </g>
+            <g class="d-grade">
+              <ellipse cx="253" cy="120" rx="46" ry="21" class="d-red" fill="none"/>
+              <path d="M276 60 L286 74 L306 44" class="d-red" fill="none"/>
+            </g>
+          </svg>
+          <button class="btn small ghost demo-btn" id="demoBtn" type="button" aria-pressed="false">지워 보기</button>
+        </div>
+
+        <div class="intro">
+          <h2>채점 표시와 내 풀이를 지워서,<br>다시 풀 수 있는 문제로.</h2>
+          <p class="lead">틀린 문제를 찍어 올리면 빨간 채점 표시를 자동으로 지우고, 내가 쓴 답과 풀이는 색으로 고르거나 직접 문질러서 지울 수 있어요.</p>
+        </div>
       </div>
-      <div id="emptyEditor" class="empty">사진을 등록하면 여기에서 문제 영역을 선택할 수 있어요.</div>
+
+      <div class="cta">
+        <button class="btn primary" id="btnCam" type="button">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l1.6-2.4h6.8L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.6"/></svg>
+          문제 사진 찍기
+        </button>
+        <button class="btn ghost" id="btnGallery" type="button">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M21 16l-5-5-8 9"/></svg>
+          앨범에서 고르기
+        </button>
+        <button class="btn link" id="btnInstall" type="button" hidden>홈 화면에 앱 설치하기</button>
+        <p class="hint" id="iosHint" hidden>Safari 하단의 공유 버튼을 누른 뒤 <b>홈 화면에 추가</b>를 선택하면 앱처럼 쓸 수 있어요.</p>
+        <p class="privacy">사진은 이 기기 안에서만 처리되고 서버로 전송되지 않아요.</p>
+      </div>
     </section>
-    <aside class="panel">
-      <h2>② 오답 문제 목록</h2><p class="sub">문제 영역을 추가한 다음 틀린 문제에 ‘오답’ 표시를 해주세요.</p>
-      <div class="counts"><span class="count">전체 <b id="totalCount">0</b>개</span><span class="count">오답 <b id="wrongCount">0</b>개</span></div>
-      <div id="problemList" class="problem-list"><div class="empty">아직 추가된 문제가 없습니다.</div></div>
-      <div class="separator"></div>
-      <label class="hint" for="bookTitle">오답노트 제목</label><input id="bookTitle" value="수학 오답노트" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;margin:5px 0 8px">
-      <button id="printBtn" class="full" disabled>오답 문제 PDF 저장 / 인쇄</button>
-      <button id="downloadData" class="secondary full" disabled>작업 목록 백업(JSON)</button>
-      <button id="clearBtn" class="danger full">전체 초기화</button>
-      <p class="hint">PDF 저장은 인쇄 창에서 ‘PDF로 저장’을 선택하세요. 사진은 이 브라우저 안에서 처리되며 서버로 전송되지 않습니다.</p>
-    </aside>
-  </div>
-  <div class="note" style="margin-top:16px"><b>자동 분석 기능 안내</b><br>색상 채점 표시와 회색 연필로 추정되는 픽셀을 브라우저 안에서 자동 감지·보정합니다. 이는 로컬 이미지 처리이며 생성형 AI의 완벽한 복원은 아닙니다. 인쇄된 글자와 필기가 겹치거나 색이 비슷하면 잘못 지워질 수 있으므로, 반드시 결과를 확인하고 필요하면 되돌리세요. 틀린 답의 의미 판별은 자동 확정하지 않습니다.</div>
+
+    <!-- 2. 자르기 -->
+    <section id="screen-crop" class="screen" hidden>
+      <p class="stage-hint">모서리를 끌어 문제 부분만 선택하세요</p>
+      <div class="stage" id="cropStage"><canvas id="cropCanvas"></canvas></div>
+      <div class="bar">
+        <button class="btn ghost small" id="btnRotate" type="button">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></svg>
+          회전
+        </button>
+        <button class="btn ghost small" id="btnCropReset" type="button">전체 선택</button>
+        <button class="btn primary grow" id="btnCropNext" type="button">다음: 지우기</button>
+      </div>
+    </section>
+
+    <!-- 3. 지우기 -->
+    <section id="screen-edit" class="screen" hidden>
+      <div class="stage edit-stage" id="editStage">
+        <div class="canvas-wrap" id="canvasWrap" data-tool="brush">
+          <canvas id="mainCanvas"></canvas>
+          <canvas id="ovlCanvas"></canvas>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="row auto-row">
+          <label class="switch">
+            <input type="checkbox" id="optRed" checked>
+            <span class="track" aria-hidden="true"></span>
+            <span class="lbl">빨간 채점 자동 지우기</span>
+          </label>
+          <label class="slider-inline" title="민감도">
+            <span class="sr">민감도</span>
+            <input type="range" id="redSens" min="0" max="100" value="55">
+          </label>
+        </div>
+
+        <div class="seg" role="radiogroup" aria-label="지우개 도구">
+          <button type="button" role="radio" data-tool="brush" aria-checked="true">브러시</button>
+          <button type="button" role="radio" data-tool="rect" aria-checked="false">영역</button>
+          <button type="button" role="radio" data-tool="ink" aria-checked="false">글씨 색</button>
+          <button type="button" role="radio" data-tool="auto" aria-checked="false">손글씨 감지</button>
+          <button type="button" role="radio" data-tool="pan" aria-checked="false">이동</button>
+        </div>
+
+        <div class="opts" id="opt-brush">
+          <label class="slider-row"><span>굵기</span><input type="range" id="brushSize" min="2" max="40" value="10"></label>
+        </div>
+        <div class="opts" id="opt-rect" hidden>
+          <p class="tip">지울 부분을 사각형으로 끌어서 선택하세요. 답란이나 풀이 영역에 편해요.</p>
+        </div>
+        <div class="opts" id="opt-ink" hidden>
+          <p class="tip" id="inkTip">지우고 싶은 펜 글씨를 화면에서 탭하면 같은 색이 모두 지워져요. 검정 펜·연필은 구분이 어려워 브러시를 써 주세요.</p>
+          <div class="ink-row">
+            <div class="chips" id="inkChips" aria-label="선택한 글씨 색"></div>
+            <label class="slider-row compact"><span>범위</span><input type="range" id="inkAngle" min="8" max="45" value="22"></label>
+          </div>
+        </div>
+        <div class="opts" id="opt-auto" hidden>
+          <p class="tip" id="autoTip">연필·검정 펜 풀이를 자동으로 찾아요. 노란 칸이 지워진 부분이에요. 지우면 안 되는 칸은 탭해서 빼 주세요.</p>
+          <div class="auto-row2">
+            <button type="button" class="btn small ghost" id="btnDetect">다시 찾기</button>
+            <button type="button" class="btn small ghost" id="btnDetectClear">감지 취소</button>
+            <label class="slider-row compact"><span>민감도</span><input type="range" id="hwSens" min="0" max="100" value="50"></label>
+          </div>
+        </div>
+        <div class="opts" id="opt-pan" hidden>
+          <p class="tip">확대한 화면을 손가락으로 움직여 볼 수 있어요.</p>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="tool-btn" id="btnUndo" disabled aria-label="되돌리기">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg>
+            <span>되돌리기</span>
+          </button>
+          <button type="button" class="tool-btn" id="btnOrig" aria-label="누르고 있는 동안 원본 보기">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span>원본 보기</span>
+          </button>
+          <div class="zoom" role="group" aria-label="확대 축소">
+            <button type="button" class="tool-btn icon" id="zoomOut" aria-label="축소">−</button>
+            <output id="zoomVal">100%</output>
+            <button type="button" class="tool-btn icon" id="zoomIn" aria-label="확대">+</button>
+          </div>
+          <button type="button" class="btn primary save" id="btnSave">저장</button>
+        </div>
+      </div>
+    </section>
+  </main>
 </div>
-<div id="printArea" class="hidden"></div>
-<script>
-const $=id=>document.getElementById(id);
-const input=$('fileInput'), canvas=$('pageCanvas'), ctx=canvas.getContext('2d');
-let pages=[], pageIndex=0, mode='crop', dragging=false, start=null, current=null, problems=[], undoStack=[];
-function setStatus(t){$('pageStatus').textContent=t}
-function loadFiles(files){const arr=[...files].filter(f=>f.type.startsWith('image/'));if(!arr.length)return;let loaded=0;arr.forEach(file=>{const url=URL.createObjectURL(file),img=new Image();img.onload=()=>{pages.push({name:file.name,img,canvas:makeCanvas(img),undo:[]});loaded++;if(loaded===arr.length){pageIndex=pages.length-arr.length;showEditor();drawPage();}};img.onerror=()=>{loaded++;};img.src=url;});}
-function makeCanvas(img){const c=document.createElement('canvas');c.width=img.naturalWidth;c.height=img.naturalHeight;c.getContext('2d').drawImage(img,0,0);return c}
-function showEditor(){$('editor').classList.remove('hidden');$('emptyEditor').classList.add('hidden');$('uploadBox').style.padding='10px';$('pageStatus').textContent='';}
-function drawPage(){const p=pages[pageIndex];if(!p)return;canvas.width=p.canvas.width;canvas.height=p.canvas.height;ctx.drawImage(p.canvas,0,0);if(current&&mode==='crop'){ctx.save();ctx.strokeStyle='#315efb';ctx.lineWidth=Math.max(3,canvas.width/500);ctx.setLineDash([12,8]);ctx.strokeRect(current.x,current.y,current.w,current.h);ctx.restore()}$('prevPage').disabled=pageIndex===0;$('nextPage').disabled=pageIndex===pages.length-1;setStatus(`사진 ${pageIndex+1}/${pages.length} · ${p.name} · ${canvas.width}×${canvas.height}`)}
-function setMode(m){mode=m;current=null;$('cropMode').className=m==='crop'?'':'secondary';$('eraseMode').className=m==='erase'?'':'secondary';canvas.style.cursor=m==='crop'?'crosshair':'cell';setStatus(m==='crop'?'문제 하나를 드래그해 영역을 선택하세요.':'지울 필기 위를 드래그해 흰색으로 덮으세요.');drawPage()}
-function pos(e){const r=canvas.getBoundingClientRect();return{x:Math.max(0,Math.min(canvas.width,(e.clientX-r.left)*canvas.width/r.width)),y:Math.max(0,Math.min(canvas.height,(e.clientY-r.top)*canvas.height/r.height))}}
-canvas.addEventListener('pointerdown',e=>{if(!pages[pageIndex])return;canvas.setPointerCapture(e.pointerId);dragging=true;start=pos(e);if(mode==='crop'){current={x:start.x,y:start.y,w:0,h:0};drawPage()}else{const p=pages[pageIndex];p.undo.push(p.canvas.getContext('2d').getImageData(0,0,p.canvas.width,p.canvas.height));undoStack.push(pageIndex);const c=p.canvas.getContext('2d');c.strokeStyle='#fff';c.lineWidth=Math.max(18,p.canvas.width/35);c.lineCap='round';c.beginPath();c.moveTo(start.x,start.y);c.lineTo(start.x+0.1,start.y+0.1);c.stroke();drawPage()}});
-canvas.addEventListener('pointermove',e=>{if(!dragging||!start)return;const q=pos(e);if(mode==='crop'){current={x:Math.min(start.x,q.x),y:Math.min(start.y,q.y),w:Math.abs(q.x-start.x),h:Math.abs(q.y-start.y)};drawPage()}else{const p=pages[pageIndex],c=p.canvas.getContext('2d');c.strokeStyle='#fff';c.lineWidth=Math.max(18,p.canvas.width/35);c.lineCap='round';c.beginPath();c.moveTo(start.x,start.y);c.lineTo(q.x,q.y);c.stroke();start=q;drawPage()}});
-canvas.addEventListener('pointerup',()=>{dragging=false;start=null;if(mode==='crop'&&current&&current.w>2&&current.h>2)setStatus('영역이 선택되었습니다. 아래 버튼을 눌러 문제 목록에 추가하세요.');});
-function rgbToHsv(r,g,b){r/=255;g/=255;b/=255;const max=Math.max(r,g,b),min=Math.min(r,g,b),d=max-min;let h=0;const v=max,s=max===0?0:d/max;if(d!==0){if(max===r)h=((g-b)/d)%6;else if(max===g)h=(b-r)/d+2;else h=(r-g)/d+4;h*=60;if(h<0)h+=360;}return{h,s,v};}
-function autoRemoveColorMarks(){const p=pages[pageIndex];if(!p)return;const c=p.canvas,cc=c.getContext('2d',{willReadFrequently:true}),w=c.width,h=c.height;const before=cc.getImageData(0,0,w,h);p.undo.push(before);const data=before.data,mask=new Uint8Array(w*h);let count=0;
-  // Conservative detection of saturated red/pink/orange and blue pen marks.
-  for(let y=0;y<h;y++){for(let x=0;x<w;x++){const i=(y*w+x)*4,r=data[i],g=data[i+1],b=data[i+2],v=rgbToHsv(r,g,b);const red=(v.h<22||v.h>345)&&v.s>.32&&v.v>.35&&r>g*1.22&&r>b*1.10;const blue=v.h>195&&v.h<255&&v.s>.32&&v.v>.28&&b>r*1.12;const pink=v.h>=320&&v.h<=345&&v.s>.20&&r>g*1.12; if(red||blue||pink){mask[y*w+x]=1;count++;}}}
-  if(count===0){p.undo.pop();setStatus('뚜렷한 빨강·분홍·파랑 채점 흔적을 찾지 못했습니다. 수동 지우개를 사용해 주세요.');return;}
-  // Expand mask slightly to cover anti-aliased edges, but keep the change local.
-  const expanded=mask.slice();for(let y=1;y<h-1;y++)for(let x=1;x<w-1;x++)if(mask[y*w+x]){for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)expanded[(y+dy)*w+x+dx]=1;}
-  const out=new Uint8ClampedArray(data);const radius=5;
-  for(let y=0;y<h;y++)for(let x=0;x<w;x++){const idx=y*w+x;if(!expanded[idx])continue;let rr=0,gg=0,bb=0,n=0;for(let rad=1;rad<=radius&&n<8;rad++){for(let dx=-rad;dx<=rad;dx++){for(const yy of [y-rad,y+rad]){const xx=x+dx;if(xx<0||xx>=w||yy<0||yy>=h)continue;const q=yy*w+xx;if(expanded[q])continue;const j=q*4;rr+=data[j];gg+=data[j+1];bb+=data[j+2];n++;}}for(let dy=-rad+1;dy<rad;dy++){for(const xx of [x-rad,x+rad]){const yy=y+dy;if(xx<0||xx>=w||yy<0||yy>=h)continue;const q=yy*w+xx;if(expanded[q])continue;const j=q*4;rr+=data[j];gg+=data[j+1];bb+=data[j+2];n++;}}}if(n){const j=idx*4;out[j]=rr/n;out[j+1]=gg/n;out[j+2]=bb/n;}}
-  const result=new ImageData(out,w,h);cc.putImageData(result,0,0);drawPage();setStatus(`색상 흔적 약 ${count.toLocaleString()}픽셀 감지 후 보정했습니다. 결과를 확인하고 필요하면 되돌리세요.`);
-}
-$('autoCleanBtn').onclick=()=>{if(confirm('빨강·분홍·파랑 계열의 채점 표시를 자동 감지해 주변 픽셀로 보정합니다. 인쇄된 색상 요소도 영향을 받을 수 있습니다. 진행할까요?'))autoRemoveColorMarks()};
-function autoRemovePencilMarks(){
-  const p=pages[pageIndex];if(!p)return;
-  const c=p.canvas,cc=c.getContext('2d',{willReadFrequently:true}),w=c.width,h=c.height;
-  const before=cc.getImageData(0,0,w,h),data=before.data,mask=new Uint8Array(w*h);let count=0;
-  // Conservative local heuristic: target mid-gray, low-saturation strokes on bright paper.
-  // Dark printed glyphs are intentionally excluded, but gray print/diagram lines may still be affected.
-  for(let y=2;y<h-2;y++){
-    for(let x=2;x<w-2;x++){
-      const idx=y*w+x,i=idx*4,r=data[i],g=data[i+1],b=data[i+2];
-      const max=Math.max(r,g,b),min=Math.min(r,g,b),gray=(r+g+b)/3;
-      if(max-min>24||gray<105||gray>205)continue;
-      let bright=0,n=0;
-      for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){
-        if(Math.abs(dx)+Math.abs(dy)<2)continue;
-        const j=((y+dy)*w+x+dx)*4;bright+=(data[j]+data[j+1]+data[j+2])/3;n++;
-      }
-      if(bright/n>gray+24){mask[idx]=1;count++;}
-    }
-  }
-  if(!count){setStatus('회색 연필로 추정되는 픽셀을 찾지 못했습니다. 수동 지우개로 보완해 주세요.');return;}
-  p.undo.push(before);
-  // Iterative neighbor fill approximates the paper/background underneath detected strokes.
-  const out=new Uint8ClampedArray(data),filled=new Uint8Array(w*h);for(let i=0;i<mask.length;i++)if(!mask[i])filled[i]=1;
-  let remaining=count;
-  for(let pass=0;pass<8&&remaining>0;pass++){
-    const todo=[];
-    for(let y=1;y<h-1;y++)for(let x=1;x<w-1;x++){
-      const idx=y*w+x;if(!mask[idx]||filled[idx])continue;
-      let rr=0,gg=0,bb=0,n=0;
-      for(const [dx,dy] of [[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[1,-1],[-1,1],[1,1]]){
-        const q=(y+dy)*w+x+dx;if(!filled[q])continue;const j=q*4;rr+=out[j];gg+=out[j+1];bb+=out[j+2];n++;
-      }
-      if(n>=3)todo.push([idx,rr/n,gg/n,bb/n]);
-    }
-    if(!todo.length)break;
-    for(const [idx,r,g,b] of todo){const j=idx*4;out[j]=r;out[j+1]=g;out[j+2]=b;filled[idx]=1;remaining--;}
-  }
-  // Unfilled isolated pixels are blended with their original bright neighborhood.
-  for(let idx=0;idx<mask.length;idx++)if(mask[idx]&&!filled[idx]){const j=idx*4;out[j]=out[j+1]=out[j+2]=235;}
-  cc.putImageData(new ImageData(out,w,h),0,0);drawPage();
-  setStatus(`회색 필기로 추정되는 픽셀 ${count.toLocaleString()}개를 보정했습니다. 인쇄 글자가 지워지지 않았는지 확인하세요. 필요하면 되돌리세요.`);
-}
-$('pencilCleanBtn').onclick=()=>{if(confirm('회색 연필 필기로 추정되는 중간 밝기 픽셀을 자동 보정합니다. 인쇄된 회색 선·숫자도 지워질 수 있습니다. 먼저 원본을 백업하고 진행할까요?'))autoRemovePencilMarks()};
-$('fileInput').addEventListener('change',e=>loadFiles(e.target.files));$('cropMode').onclick=()=>setMode('crop');$('eraseMode').onclick=()=>setMode('erase');$('prevPage').onclick=()=>{if(pageIndex>0){pageIndex--;current=null;drawPage()}};$('nextPage').onclick=()=>{if(pageIndex<pages.length-1){pageIndex++;current=null;drawPage()}};
-$('undoBtn').onclick=()=>{const p=pages[pageIndex];if(p&&p.undo.length){const data=p.undo.pop();p.canvas.getContext('2d').putImageData(data,0,0);current=null;drawPage()}else setStatus('되돌릴 작업이 없습니다.')};
-$('addProblem').onclick=()=>{if(!current||current.w<5||current.h<5){setStatus('먼저 문제 영역을 드래그해 선택하세요.');return}const p=pages[pageIndex],c=document.createElement('canvas');c.width=Math.round(current.w);c.height=Math.round(current.h);c.getContext('2d').drawImage(p.canvas,current.x,current.y,current.w,current.h,0,0,c.width,c.height);problems.push({id:Date.now()+Math.random(),src:c.toDataURL('image/jpeg',.92),wrong:true,label:`문제 ${problems.length+1}`,page:pageIndex+1});current=null;renderProblems();drawPage();setStatus('문제가 목록에 추가되었습니다. 오답 여부를 확인하세요.')};
-function renderProblems(){$('totalCount').textContent=problems.length;$('wrongCount').textContent=problems.filter(p=>p.wrong).length;$('printBtn').disabled=!problems.some(p=>p.wrong);$('downloadData').disabled=!problems.length;const root=$('problemList');root.innerHTML='';if(!problems.length){root.innerHTML='<div class="empty">아직 추가된 문제가 없습니다.</div>';return}problems.forEach((p,i)=>{const item=document.createElement('div');item.className='problem '+(p.wrong?'wrong':'correct');const img=document.createElement('img');img.src=p.src;img.alt='문제 미리보기';const body=document.createElement('div');const title=document.createElement('strong');title.textContent=p.label;const small=document.createElement('small');small.textContent=`원본 사진 ${p.page} · ${p.wrong?'오답으로 선택됨':'출력에서 제외됨'}`;const actions=document.createElement('div');actions.className='actions';const toggle=document.createElement('button');toggle.className=p.wrong?'danger':'secondary';toggle.textContent=p.wrong?'오답 ✓':'오답으로 표시';toggle.onclick=()=>{p.wrong=!p.wrong;renderProblems()};const rename=document.createElement('button');rename.className='secondary';rename.textContent='이름 변경';rename.onclick=()=>{const n=prompt('문제 이름',p.label);if(n&&n.trim()){p.label=n.trim();renderProblems()}};const del=document.createElement('button');del.className='secondary';del.textContent='삭제';del.onclick=()=>{problems.splice(i,1);problems.forEach((x,j)=>{if(/^문제 \d+$/.test(x.label))x.label=`문제 ${j+1}`});renderProblems()};actions.append(toggle,rename,del);body.append(title,small,actions);item.append(img,body);root.append(item)})}
-$('printBtn').onclick=()=>{const selected=problems.filter(p=>p.wrong);if(!selected.length)return;const area=$('printArea');area.innerHTML='';const header=document.createElement('div');header.className='print-header';const h=document.createElement('h1');h.textContent=$('bookTitle').value||'수학 오답노트';const sub=document.createElement('div');sub.textContent=`오답 ${selected.length}문제 · 다시 풀어보기`;header.append(h,sub);area.append(header);const grid=document.createElement('div');grid.className='print-grid';selected.forEach((p,i)=>{const card=document.createElement('section');card.className='print-item';const label=document.createElement('div');label.className='label';label.textContent=`${i+1}. ${p.label}`;const img=document.createElement('img');img.src=p.src;const blank=document.createElement('div');blank.className='blank';card.append(label,img,blank);grid.append(card)});area.append(grid);area.classList.remove('hidden');setTimeout(()=>{window.print();setTimeout(()=>area.classList.add('hidden'),800)},150)};
-$('downloadData').onclick=()=>{const data={title:$('bookTitle').value,createdAt:new Date().toISOString(),problems:problems.map(({label,wrong,page,src})=>({label,wrong,page,src}))};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='math-wrongbook-backup.json';a.click();URL.revokeObjectURL(a.href)};
-$('clearBtn').onclick=()=>{if(!confirm('사진과 문제 목록을 모두 초기화할까요?'))return;pages.forEach(p=>{if(p.img.src.startsWith('blob:'))URL.revokeObjectURL(p.img.src)});pages=[];problems=[];pageIndex=0;current=null;input.value='';$('editor').classList.add('hidden');$('emptyEditor').classList.remove('hidden');$('uploadBox').style.padding='20px';drawPage();renderProblems()};
-if('serviceWorker' in navigator && location.protocol.startsWith('http'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
-</script>
+
+<input type="file" id="fileCam" accept="image/*" capture="environment" hidden>
+<input type="file" id="fileGal" accept="image/*" hidden>
+
+<div id="busy" class="busy" role="status" aria-live="polite" hidden><i></i>처리 중…</div>
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+<dialog id="saveDlg">
+  <div class="dlg-body">
+    <h3>문제 이미지가 준비됐어요</h3>
+    <div class="prev"><img id="savePrev" alt="완성된 문제 미리보기"></div>
+    <div class="dlg-actions">
+      <button class="btn primary" id="btnDownload" type="button">이미지 저장</button>
+      <button class="btn ghost" id="btnShare" type="button" hidden>공유하기</button>
+      <button class="btn ghost" id="btnNew" type="button">새 문제 올리기</button>
+      <button class="btn link" id="btnCloseDlg" type="button">계속 편집</button>
+    </div>
+  </div>
+</dialog>
+
+<script src="engine.js"></script>
+<script src="app.js"></script>
 </body>
 </html>

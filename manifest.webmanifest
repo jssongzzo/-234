@@ -1,0 +1,18 @@
+{
+  "id": "./",
+  "name": "오답노트 - 채점과 풀이를 지워 다시 풀기",
+  "short_name": "오답노트",
+  "description": "수학 문제를 사진으로 찍으면 채점 표시와 내가 쓴 풀이를 지워 줍니다.",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F3F7F5",
+  "theme_color": "#F3F7F5",
+  "categories": ["education", "productivity"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
